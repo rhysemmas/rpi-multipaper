@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multipaper-server
+spec:
+  selector:
+    matchLabels:
+      app: multipaper-server
+  replicas: 3
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: multipaper-server
+              operator: Exists
+          topologyKey: kubernetes.io/hostname
+  template:
+    metadata:
+      labels:
+        app: multipaper-server
+    spec:
+      containers:
+      - image: rhysemmas/multipaper-server:arm64-1.20.1
+        imagePullPolicy: Always
+        name: server
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: 1
+        stdin: true
+        tty: true
+        ports:
+        - name: server
+          containerPort: 25565
+          protocol: TCP
+      nodeSelector:
+        minecraft-stateless: "true"
+      tolerations:
+      - key: CriticalAddonsOnly # k3s workaround - node is tainted with this key which the svclb also tolerates
+        operator: Exists

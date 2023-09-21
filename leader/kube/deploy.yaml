@@ -1,0 +1,57 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multipaper-leader
+spec:
+  selector:
+    matchLabels:
+      app: multipaper-leader
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: multipaper-leader
+    spec:
+      containers:
+      - image: rhysemmas/multipaper-leader:arm64-1.20.1
+        imagePullPolicy: Always
+        name: server
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 1
+        stdin: true
+        tty: true
+        ports:
+        - name: server
+          containerPort: 35353
+          protocol: TCP
+        - name: proxy
+          containerPort: 25565
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /app/world
+          name: world-pd
+        - mountPath: /app/world_nether
+          name: world-nether-pd
+        - mountPath: /app/world_the_end
+          name: world-the-end-pd
+      volumes:
+      - name: world-pd
+        hostPath:
+          path: /mnt/multipaper/world
+          type: DirectoryOrCreate
+      - name: world-nether-pd
+        hostPath:
+          path: /mnt/multipaper/world_nether
+          type: DirectoryOrCreate
+      - name: world-the-end-pd
+        hostPath:
+          path: /mnt/multipaper/world_the_end
+          type: DirectoryOrCreate
+      nodeSelector:
+        minecraft-stateful: "true"
+      tolerations:
+      - key: CriticalAddonsOnly # k3s workaround - node is tainted with this key which the svclb also tolerates
+        operator: Exists
