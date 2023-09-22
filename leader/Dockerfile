@@ -17,4 +17,4 @@ CMD java \
         -Xms2G -Xmx2G \
         -jar multipaper.jar 35353 25565
 
-EXPOSE 35353 25569
+EXPOSE 35353 25565
