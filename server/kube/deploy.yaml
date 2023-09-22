@@ -8,16 +8,6 @@ spec:
     matchLabels:
       app: multipaper-server
   replicas: 3
-  affinity:
-    podAntiAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-            - key: multipaper-server
-              operator: Exists
-          topologyKey: kubernetes.io/hostname
   template:
     metadata:
       labels:
@@ -39,6 +29,16 @@ spec:
           protocol: TCP
       nodeSelector:
         minecraft-stateless: "true"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: multipaper-server
+                  operator: Exists
+              topologyKey: kubernetes.io/hostname
       tolerations:
       - key: CriticalAddonsOnly # k3s workaround - node is tainted with this key which the svclb also tolerates
         operator: Exists
